@@ -8,13 +8,18 @@ from transformers import Sam2Processor, Sam2Model
 
 
 # resize the image
-# define function for resize 
-def resize_image(image, target_width=100):
-    h, w = image.shape[:2]
+# define function for resize
+def resize_image(image, terminal_width, terminal_height):
+	h, w = image.shape[:2]
+	height = int((h / w) * terminal_width * 0.5)
 
-    target_height = int((h / w) * target_width * 0.5)
+	if height > terminal_height:
+		height = terminal_height
 
-    return cv2.resize(image, (target_width, target_height))
+		terminal_width = int((w / h) * height / 0.5)
+
+	return cv2.resize(image, (terminal_width, height),
+			 interpolation=cv2.INTER_AREA)
 
 
 def cleanMask(mask):
@@ -49,13 +54,21 @@ def thresholding(path):
 	return mask
 
 
-def detect_edges(path):
+def detect_edges(path, terminal_width, terminal_height):
 	# Process image
-	img =  processImage(path)
+	image = loadimage(path)
+
+	image = resize_image(
+		image,
+		terminal_width,
+		terminal_height
+	)
+
+	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 	# canny algorithm to detect edge
 	# upper threshold -> 200 , lower -> 100
-	edges = cv2.Canny(img, 100, 200)
+	edges = cv2.Canny(gray, 100, 200)
 
 	return edges
 

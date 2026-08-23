@@ -6,23 +6,23 @@ import cv2
 import shutil
 
 # resize for termial
-def resize_mask_for_terminal(mask):
+def resize_mask_for_terminal(mask, width = None):
 	terminal = shutil.get_terminal_size()
 
-	max_width = terminal.columns
-	max_height = terminal.lines
+	if width is None:
+		width = terminal.columns - 2
+	else:
+		width = min(width, terminal.columns - 2)
+
 
 	h, w = mask.shape[:2]
 
-	height = int((h/ w) * max_width * 0.5)
+	height = int((h/ w) * width * 0.5)
 
 	# leave some space for terminal 
-	if height > max_height - 2:
-		height = max_height  - 1
-		width = int((w/h)*height / 0.5)
-
-	else:
-		width = max_width
+	if height > terminal.lines - 2:
+		height = terminal.lines - 2
+		width = int((w/h) * height / 0.5)
 
 	# resize the mask
 	mask = cv2.resize(
@@ -33,26 +33,37 @@ def resize_mask_for_terminal(mask):
 	return mask
 
 
-def renderer(path, method):
+def renderer(path, mode, width=None, char="*"):
+
+	terminal = shutil.get_terminal_size()
+
+	if width is None:
+		width = terminal.columns - 2
+
+	height = terminal.lines - 2
 
 	# select method
-	if method == 1:
+	if mode == "threshold" :
 		mask = thresholding(path)
-	elif method == 2:
-		mask = detect_edges(path)
-	elif method == 3:
-		mask = segment_image(path, 300, 200)
+
+	elif mode == "outline":
+		mask = detect_edges(path, width, height)
+
+	elif mode == "silhouette":
+		mask = segment_image(path, width, height)
+
 	else:
 		print("Invalid input")
 		return
 
-	mask = resize_mask_for_terminal(mask)
+	if mode != "outline":
+		mask = resize_mask_for_terminal(mask, width)
 
 
 	for row in mask:
 		for pixel in row:
 			if pixel == 255:
-				print("*", end="")
+				print(char, end="")
 			else:
 				print(" ", end="")
 		print()

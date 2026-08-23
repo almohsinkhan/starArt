@@ -1,35 +1,74 @@
 from pathlib import Path
 from src.renderer import renderer
 
+import argparse
 
 def main():
+	parser = argparse.ArgumentParser(
+		description="Convert images into ASCII StarArt."
+	)
 
-    dir_path = Path("example")
+	# Image Path
+	parser.add_argument(
+		"image",
+		type=Path,
+		help="Path to the input image"
+	)
 
-    files = [p.name for p in dir_path.iterdir()]
+	# Processing method
+	parser.add_argument(
+		"-m",
+		"--mode",
+		choices=["threshold", "outline", "silhouette"],
+		default="outline",
+		help="Image Processing mode (default: outline)"
+	)
 
-    i = 1
+	# Output width
+	parser.add_argument(
+		"-w",
+		"--width",
+		type=int,
+		help="Maximum output width"
+	)
 
-    for file in files:
-        print(f"{i}. {file}")
-        i += 1
+	# Character
+	parser.add_argument(
+		"-c",
+		"--char",
+		default="*",
+		help="Character used to render the image"
+	)
 
-    test_file = int(input("image to test (index): "))
+	args =  parser.parse_args()
 
-    IMAGE_PATH = dir_path / files[test_file - 1]
+	# check image exists
+	if not args.image.exists():
+		parser.error(
+			f"Not a file: {args.image}"
+		)
 
-    method = int(input(
-        "\n"
-        "1. Thresholding (filled object)\n"
-        "2. Canny (outline)\n"
-        "3. Segmentation (filled object)\n"
-        "Select method: "
-    ))
+	if not args.image.is_file():
+		parser.error(
+			f"Not a file: {args.image}"
+		)
 
-    print(f"Testing {IMAGE_PATH} using method {method}")
 
-    renderer(IMAGE_PATH, method)
+	# validate width
+	if args.width is not None and args.width <= 0:
+		parser.error(
+			f"Width much be greater than 0."
+		)
+
+	# Validate character
+	if len(args.char) != 1:
+		parser.error(
+			"character much contain exactly one character."
+		)
+
+	renderer(args.image, args.mode, args.width, args.char)
 
 
 if __name__ == "__main__":
     main()
+
