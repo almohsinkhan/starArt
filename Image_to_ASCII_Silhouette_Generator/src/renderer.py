@@ -1,6 +1,36 @@
-from .processor import thresholding, detect_edges, resize_image, segment_image
+from .processor import thresholding, detect_edges, segment_image
 from pathlib import Path
 import cv2
+
+# import for termial operation dealing
+import shutil
+
+# resize for termial
+def resize_mask_for_terminal(mask):
+	terminal = shutil.get_terminal_size()
+
+	max_width = terminal.columns
+	max_height = terminal.lines
+
+	h, w = mask.shape[:2]
+
+	height = int((h/ w) * max_width * 0.5)
+
+	# leave some space for terminal 
+	if height > max_height - 2:
+		height = max_height  - 1
+		width = int((w/h)*height / 0.5)
+
+	else:
+		width = max_width
+
+	# resize the mask
+	mask = cv2.resize(
+		mask,
+		(width, height),
+		interpolation=cv2.INTER_NEAREST)
+
+	return mask
 
 
 def renderer(path, method):
@@ -11,10 +41,12 @@ def renderer(path, method):
 	elif method == 2:
 		mask = detect_edges(path)
 	elif method == 3:
-		mask = resize_image(segment_image(path, 300, 200))
+		mask = segment_image(path, 300, 200)
 	else:
 		print("Invalid input")
-		return 
+		return
+
+	mask = resize_mask_for_terminal(mask)
 
 
 	for row in mask:

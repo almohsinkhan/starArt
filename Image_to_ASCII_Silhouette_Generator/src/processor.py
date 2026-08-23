@@ -29,10 +29,10 @@ def processImage(path):
 	img = loadimage(path)
 
 	# call resize image function
-	re_image = resize_image(img)
+	#re_image = resize_image(img)
 
 	# convert the RGB image to gray scale
-	gray = cv2.cvtColor(re_image, cv2.COLOR_BGR2GRAY)
+	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 	# blur the image to remove the noise 
 	blur = cv2.GaussianBlur(gray, (5, 5), 0)
