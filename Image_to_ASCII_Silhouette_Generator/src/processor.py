@@ -115,18 +115,8 @@ def segment_image(path, x, y):
 
 	return mask
 
-
-
 if __name__ == "__main__":
-	IMAGE_PATH  =  "../example/dog.jpg"
 
-	mask =  detect_edges(IMAGE_PATH)
+    point = select_point("../example/dog.jpg")
 
-	# take look at image
-	cv2.imshow("grey image", mask)
-
-	# 1. Keeps the window open until you press any key
-	cv2.waitKey(0)
-
-	# 2. Clears the window from your screen and frees up memory
-	cv2.destroyAllWindows()
+    print("Final point:", point)

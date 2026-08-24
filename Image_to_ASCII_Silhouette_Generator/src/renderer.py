@@ -1,4 +1,5 @@
 from .processor import thresholding, detect_edges, segment_image
+from .point_selector import select_point
 from pathlib import Path
 import cv2
 
@@ -50,7 +51,15 @@ def renderer(path, mode, width=None, char="*"):
 		mask = detect_edges(path, width, height)
 
 	elif mode == "silhouette":
-		mask = segment_image(path, width, height)
+
+		point = select_point(path)
+
+		if point is None:
+			print("No point selected.")
+			return
+		x, y = point
+
+		mask = segment_image(path, x, y)
 
 	else:
 		print("Invalid input")
