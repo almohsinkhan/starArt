@@ -1,4 +1,19 @@
+# Virtual environment
 venv/
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+
+# Jupyter
 .ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Python package build
+*.egg-info/

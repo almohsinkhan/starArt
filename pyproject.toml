@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "starart"
+version = "0.2.0"
+description = "Convert images into terminal-based ASCII StarArt"
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+	"opencv-python",
+	"numpy",
+]
+
+[project.optional-dependencies]
+sam2 = [
+	"torch",
+	"transformers",
+]
+
+[project.scripts]
+starart = "starart.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

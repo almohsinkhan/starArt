@@ -3,10 +3,6 @@ import numpy as np
 
 from .loader import loadimage
 
-import torch
-from transformers import Sam2Processor, Sam2Model
-
-
 # resize the image
 # define function for resize
 def resize_image(image, terminal_width, terminal_height):
@@ -75,16 +71,42 @@ def detect_edges(path, terminal_width, terminal_height):
 # model
 MODEL_ID = "facebook/sam2.1-hiera-tiny"
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+sam_processor = None
+sam_model = None
 
-processor = Sam2Processor.from_pretrained(MODEL_ID)
+def load_sam2():
+	try:
+		import torch
+		from transformers import Sam2Processor, Sam2Model
+	except ImportError:
+		raise RuntimeError(
+			"Silhouette mode required the SAM2 dependecies.\n"
+			"Install then with: \n"
+			"	pip install 'starart[sam2]'"
+		)
 
-model = Sam2Model.from_pretrained(MODEL_ID).to(device)
-model.eval()
+	device = "cuda" if torch.cuda.is_available() else "cpu"
 
+	global sam_processor
+	global sam_model
+
+	if sam_processor is None or sam_model is None:
+		print("Loading SAM2...")
+
+		sam_processor = Sam2Processor.from_pretrained(MODEL_ID)
+
+		sam_model =Sam2Model.from_pretrained(MODEL_ID).to(device)
+
+		sam_model.eval()
+		print("SAM2 loaded.")
+
+	return sam_processor, sam_model
 
 
 def segment_image(path, x, y):
+
+	sam_processor, sam_model = load_sam2()
+
 	img = loadimage(path)
 
 	# convert BGR -> RGB
@@ -93,17 +115,17 @@ def segment_image(path, x, y):
 	input_points = [[[[x, y]]]]
 	input_labels = [[[1]]]
 
-	inputs = processor(
+	inputs = sam_processor(
 		images = image,
 		input_points=input_points,
 		input_labels=input_labels,
 		return_tensors="pt").to(device)
 
 	with torch.no_grad():
-		outputs = model(**inputs)
+		outputs = sam_model(**inputs)
 
 	# return multiple mask candiates
-	masks = processor.post_process_masks(
+	masks = sam_processor.post_process_masks(
 		outputs.pred_masks.cpu(),
 		inputs["original_sizes"])[0]
 
