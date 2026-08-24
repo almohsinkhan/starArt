@@ -137,8 +137,31 @@ def segment_image(path, x, y):
 
 	return mask
 
+
+def ascii_art(path):
+	image = loadimage(path)
+
+	# Convert BGR image to grayscale
+	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+	return gray
+
+def convert_to_ascii(image, chars):
+    result = []
+
+    for row in image:
+        line = ""
+
+        for pixel in row:
+            index = int(pixel / 255 * (len(chars) - 1))
+            line += chars[index]
+
+        result.append(line)
+
+    return result
+
+
 if __name__ == "__main__":
-
-    point = select_point("../example/dog.jpg")
-
-    print("Final point:", point)
+	PATH = "../example/dog.jpg"
+	print(ascii_art(PATH))
+	# print("Final point:", point)

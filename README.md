@@ -59,6 +59,24 @@ Example:
 
 soon.....
 
+### ASCII
+
+Converts the image into grayscale ASCII art using different characters based on brightness.
+
+```bash
+starart image.jpg --mode ascii
+```
+
+You can also control the output width:
+
+starart image.jpg --mode ascii --width 80
+
+And provide your own brightness gradient:
+
+starart image.jpg --mode ascii --char " .:-=+*#%@"
+
+![alt text](<Screenshot From 2026-08-25 00-12-01.png>)
+
 ## Customization
 
 ### Change output width

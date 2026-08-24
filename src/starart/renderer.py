@@ -1,4 +1,9 @@
-from .processor import thresholding, detect_edges, segment_image
+from .processor import (thresholding, 
+                        detect_edges, 
+                        segment_image, 
+                        ascii_art,
+						convert_to_ascii)
+
 from .point_selector import select_point
 from pathlib import Path
 import cv2
@@ -33,8 +38,38 @@ def resize_mask_for_terminal(mask, width = None):
 
 	return mask
 
+def resize_ascii_image_for_terminal(image, width = None):
+	terminal = shutil.get_terminal_size()
+
+	if width is None:
+		width = terminal.columns - 2
+	else:
+		width = min(width, terminal.columns - 2)
+
+
+	h, w = image.shape[:2]
+
+	height = int((h/ w) * width * 0.5)
+
+	# leave some space for terminal 
+	if height > terminal.lines - 2:
+		height = terminal.lines - 2
+		width = int((w/h) * height / 0.5)
+
+	# resize the mask
+	image = cv2.resize(
+		image,
+		(width, height),
+		interpolation=cv2.INTER_AREA)
+
+	return image
 
 def renderer(path, mode, width=None, char="*"):
+
+	if mode == "ascii" and char is None:
+		char =  " .:-=+*#%@"
+	elif char is None:
+		char = "*"
 
 	terminal = shutil.get_terminal_size()
 
@@ -61,9 +96,28 @@ def renderer(path, mode, width=None, char="*"):
 
 		mask = segment_image(path, x, y)
 
+	elif mode =="ascii":
+		image = ascii_art(path)
+
+		image_height, image_width = image.shape
+
+		# keep the characters roughlu square
+		new_width = min(image_width, width)
+		new_height = int(image_height * (new_width / image_width) * 0.5)
+
+		image = resize_ascii_image_for_terminal(image, width)
+
+		ascii_image = convert_to_ascii(image, char)
+
+		for line in ascii_image:
+			print(line)
+			
+		return 
+
 	else:
 		print("Invalid input")
 		return
+
 
 	if mode != "outline":
 		mask = resize_mask_for_terminal(mask, width)
