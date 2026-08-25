@@ -26,23 +26,12 @@ def cleanMask(mask):
 
 	return mask
 
-def processImage(path):
-	img = loadimage(path)
-
-	# call resize image function
-	#re_image = resize_image(img)
-
-	# convert the RGB image to gray scale
-	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-	# blur the image to remove the noise 
-	blur = cv2.GaussianBlur(gray, (5, 5), 0)
-
-	return gray
 
 def thresholding(path):
-	# process image
-	img =  processImage(path)
+	img  = loadimage(path)
+
+	# convert the RGB image to gray scale
+	img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 	# thresholding
 	threshold_value, mask = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -138,13 +127,6 @@ def segment_image(path, x, y):
 	return mask
 
 
-def ascii_art(path):
-	image = loadimage(path)
-
-	# Convert BGR image to grayscale
-	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-	return gray
 
 def convert_to_ascii(image, chars):
     result = []
@@ -159,6 +141,7 @@ def convert_to_ascii(image, chars):
         result.append(line)
 
     return result
+
 
 
 if __name__ == "__main__":

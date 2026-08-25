@@ -8,9 +8,31 @@ def loadimage(path):
 
     return image
 
+
+def load_video(path):
+    cap = cv2.VideoCapture(path)
+
+    if not cap.isOpened():
+        raise FileNotFoundError(f"Could not open video: {path}")
+
+    # frame per second
+    fps = cap.get(cv2.CAP_PROP_FPS)
+
+    def frames():
+        while True:
+            ret, frame = cap.read()
+
+            if not ret:
+                break
+
+            yield frame
+
+        cap.release()
+
+    return  frames(), fps
+
+
 if __name__ == "__main__":
-	IMAGE_PATH = input("Image path : ")
-	img  = loadimage(IMAGE_PATH)
-	cv2.imshow("god image", img)
-	cv2.waitKey(0)
-	cv2.destroyAllWindows()
+	VIDEO_PATH = "examples/video.mp4"
+	load_video(VIDEO_PATH)
+

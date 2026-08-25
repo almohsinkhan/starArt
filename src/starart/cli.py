@@ -15,6 +15,7 @@ def main():
 		"  starart dog.jpg --mode outline --char \"#\"\n"
 		"  starart dog.jpg --mode ascii\n"
 		"  starart dog.jpg --mode ascii --width 80"
+		"  starart video.mp4 --mode video\n"
 	),
 	formatter_class=argparse.RawDescriptionHelpFormatter,
    )
@@ -23,21 +24,22 @@ def main():
 	parser.add_argument(
 		"image",
 		type=Path,
-		help="Path to the input image"
+		help="Path to the input image or video file"
 	)
 
 	# Processing method
 	parser.add_argument(
 		"-m",
 		"--mode",
-		choices=["threshold", "outline", "silhouette", "ascii"],
+		choices=["threshold", "outline", "silhouette", "ascii", "video"],
 		default="outline",
 		help=(
             "Image processing mode: "
             "threshold=filled object, "
             "outline=edge detection, "
             "silhouette=SAM2 segmentation, "
-            "ascii=grayscale ASCII art "
+            "ascii=grayscale ASCII art, "
+            "video=video playback "
             "(default: outline)"),
 	)
 
@@ -61,7 +63,7 @@ def main():
 
 	# check if image exist
 	if not Path(args.image).is_file():
-		parser.error(f"Image file not found: {args.image}")
+		parser.error(f"File not found: {args.image}")
 
 	# validate width
 	if args.width is not None:

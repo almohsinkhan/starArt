@@ -1,12 +1,16 @@
+from turtle import width
+
 from .processor import (thresholding, 
                         detect_edges, 
                         segment_image, 
-                        ascii_art,
 						convert_to_ascii)
 
+from .loader import loadimage, load_video
 from .point_selector import select_point
 from pathlib import Path
 import cv2
+import time 
+
 
 # import for termial operation dealing
 import shutil
@@ -65,12 +69,12 @@ def resize_ascii_image_for_terminal(image, width = None):
 	return image
 
 def renderer(path, mode, width=None, char="*"):
-
-	if mode == "ascii" and char is None:
-		char =  " .:-=+*#%@"
+	
+	if mode in ("ascii", "video") and char is None:
+		char = " .:-=+*#%@"
 	elif char is None:
 		char = "*"
-
+	
 	terminal = shutil.get_terminal_size()
 
 	if width is None:
@@ -97,7 +101,11 @@ def renderer(path, mode, width=None, char="*"):
 		mask = segment_image(path, x, y)
 
 	elif mode =="ascii":
-		image = ascii_art(path)
+		image = loadimage(path)
+
+		# convert to gray scale
+
+		image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 		image_height, image_width = image.shape
 
@@ -111,6 +119,37 @@ def renderer(path, mode, width=None, char="*"):
 
 		for line in ascii_image:
 			print(line)
+
+		return 
+	
+	elif mode == "video":
+		frames, fps = load_video(path)
+
+		frame_time = 1 / fps
+
+		first_frame = True
+
+		for frame in frames:
+			start_time = time.perf_counter()
+
+			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+			frame = resize_ascii_image_for_terminal(frame, width)
+
+			ascii_image = convert_to_ascii(frame, char)
+
+			if not first_frame:
+				print(f"\033[{len(ascii_image)}A", end="")
+
+			print("\n".join(ascii_image))
+
+			elapsed_time = time.perf_counter() - start_time	
+			remaining_time = frame_time - elapsed_time
+
+			if remaining_time > 0:
+				time.sleep(remaining_time)
+
+			first_frame = False
 			
 		return 
 
@@ -119,7 +158,7 @@ def renderer(path, mode, width=None, char="*"):
 		return
 
 
-	if mode != "outline":
+	if mode not in ("outline", "ascii", "video"):
 		mask = resize_mask_for_terminal(mask, width)
 
 
