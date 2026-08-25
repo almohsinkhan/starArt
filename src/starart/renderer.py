@@ -5,7 +5,7 @@ from .processor import (thresholding,
                         segment_image, 
 						convert_to_ascii)
 
-from .loader import loadimage, load_video
+from .loader import loadimage, load_video, load_video_by_camera
 from .point_selector import select_point
 from pathlib import Path
 import cv2
@@ -70,7 +70,7 @@ def resize_ascii_image_for_terminal(image, width = None):
 
 def renderer(path, mode, width=None, char="*"):
 	
-	if mode in ("ascii", "video") and char is None:
+	if mode in ("ascii", "video", "camera") and char is None:
 		char = " .:-=+*#%@"
 	elif char is None:
 		char = "*"
@@ -123,36 +123,72 @@ def renderer(path, mode, width=None, char="*"):
 		return 
 	
 	elif mode == "video":
-		frames, fps = load_video(path)
 
-		frame_time = 1 / fps
+		try:
+			frames, fps = load_video(path)
 
-		first_frame = True
+			frame_time = 1 / fps
 
-		for frame in frames:
-			start_time = time.perf_counter()
+			first_frame = True
 
-			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+			for frame in frames:
+				start_time = time.perf_counter()
 
-			frame = resize_ascii_image_for_terminal(frame, width)
+				frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-			ascii_image = convert_to_ascii(frame, char)
+				frame = resize_ascii_image_for_terminal(frame, width)
 
-			if not first_frame:
-				print(f"\033[{len(ascii_image)}A", end="")
+				ascii_image = convert_to_ascii(frame, char)
 
-			print("\n".join(ascii_image))
+				if not first_frame:
+					print(f"\033[{len(ascii_image)}A", end="")
 
-			elapsed_time = time.perf_counter() - start_time	
-			remaining_time = frame_time - elapsed_time
+				print("\n".join(ascii_image))
 
-			if remaining_time > 0:
-				time.sleep(remaining_time)
+				elapsed_time = time.perf_counter() - start_time	
+				remaining_time = frame_time - elapsed_time
 
-			first_frame = False
+				if remaining_time > 0:
+					time.sleep(remaining_time)
+
+				first_frame = False
+		except KeyboardInterrupt:
+			print("\nExiting video mode.")
 			
 		return 
 
+	elif mode == "camera":
+		try: 
+			frames, fps = load_video_by_camera()
+
+			# frame_time = 1 / fps
+
+			first_frame = True
+
+			for frame in frames:
+				start_time = time.perf_counter()
+
+				frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+				frame = resize_ascii_image_for_terminal(frame, width)
+
+				ascii_image = convert_to_ascii(frame, char)
+
+				if not first_frame:
+					print(f"\033[{len(ascii_image)}A", end="")
+
+				print("\n".join(ascii_image))
+
+				"""elapsed_time = time.perf_counter() - start_time	
+				remaining_time = frame_time - elapsed_time
+
+				if remaining_time > 0:
+					time.sleep(remaining_time)"""
+
+				first_frame = False
+		except KeyboardInterrupt:
+			print("\nExiting camera mode.")	
+		return
 	else:
 		print("Invalid input")
 		return
