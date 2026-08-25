@@ -59,7 +59,7 @@ Example:
 
 soon.....
 
-### ASCII
+### 4. ASCII
 
 Converts the image into grayscale ASCII art using different characters based on brightness.
 
@@ -77,6 +77,19 @@ starart image.jpg --mode ascii --char " .:-=+*#%@"
 
 ![alt text](<Screenshot From 2026-08-25 00-12-01.png>)
 
+### 5. Video
+
+StarArt can also turn videos and live camera feeds into ASCII art directly in the terminal.
+
+```bash
+starart video.mp4 --mode video
+
+For a live camera:
+
+starart camera
+
+Press Ctrl+C to stop playback
+
 ## Customization
 
 ### Change output width
@@ -84,6 +97,7 @@ starart image.jpg --mode ascii --char " .:-=+*#%@"
 ```bash
 starart image.jpg --mode outline --width 80
 ```
+
 
 ### Change rendering character
 
